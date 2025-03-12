@@ -19,15 +19,15 @@ import (
 var Symbols = stdlib.Symbols
 
 type DynamicExtension struct {
-	SourceCode   string `json:"sourceCode"`
-	SourcePath   string `json:"sourcePath"`
-	_interpreter *interp.Interpreter
+	ExtensionCode string `json:"extensionCode"`
+	ExtensionPath string `json:"extensionPath"`
+	_interpreter  *interp.Interpreter
 }
 
 func NewDynamicExtension(sourceCode string, sourcePath string) *DynamicExtension {
 	return &DynamicExtension{
-		SourceCode: sourceCode,
-		SourcePath: sourcePath,
+		ExtensionCode: sourceCode,
+		ExtensionPath: sourcePath,
 	}
 }
 
@@ -36,7 +36,7 @@ func (extension *DynamicExtension) _Eval() (err error) {
 		return nil
 	}
 
-	if extension.SourceCode == "" && extension.SourcePath == "" {
+	if extension.ExtensionCode == "" && extension.ExtensionPath == "" {
 		return errors.New("sourceCode or sourcePath required")
 	}
 
@@ -44,18 +44,18 @@ func (extension *DynamicExtension) _Eval() (err error) {
 	interpreter := interp.New(interp.Options{})
 	interpreter.Use(Symbols) //注册当前包结构体
 
-	if extension.SourceCode != "" {
-		_, err = interpreter.Eval(extension.SourceCode)
+	if extension.ExtensionCode != "" {
+		_, err = interpreter.Eval(extension.ExtensionCode)
 		if err != nil {
-			err = errors.WithMessagef(err, "compile dynamic go sourceCode: %s", extension.SourcePath)
+			err = errors.WithMessagef(err, "compile dynamic go sourceCode: %s", extension.ExtensionPath)
 			return err
 		}
 	}
 
-	if extension.SourcePath != "" {
-		_, err = interpreter.EvalPath(extension.SourcePath)
+	if extension.ExtensionPath != "" {
+		_, err = interpreter.EvalPath(extension.ExtensionPath)
 		if err != nil {
-			err = errors.WithMessagef(err, "compile dynamic go sourcePath: %s", extension.SourcePath)
+			err = errors.WithMessagef(err, "compile dynamic go sourcePath: %s", extension.ExtensionPath)
 			return err
 		}
 	}
