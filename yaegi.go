@@ -22,6 +22,12 @@ type DynamicExtension struct {
 	ExtensionCode string `json:"extensionCode"`
 	ExtensionPath string `json:"extensionPath"`
 	_interpreter  *interp.Interpreter
+	symbols       map[string]map[string]reflect.Value `json:"-"`
+}
+
+func (extension *DynamicExtension) Withsymbols(symbols map[string]map[string]reflect.Value) *DynamicExtension {
+	extension.symbols = symbols
+	return extension
 }
 
 func NewDynamicExtension(sourceCode string, sourcePath string) *DynamicExtension {
@@ -42,7 +48,8 @@ func (extension *DynamicExtension) _Eval() (err error) {
 
 	// 解析动态脚本
 	interpreter := interp.New(interp.Options{})
-	interpreter.Use(Symbols) //注册当前包结构体
+	interpreter.Use(Symbols)           //注册当前包结构体
+	interpreter.Use(extension.symbols) //注册外部包结构体
 
 	if extension.ExtensionCode != "" {
 		_, err = interpreter.Eval(extension.ExtensionCode)
@@ -66,6 +73,17 @@ func (extension *DynamicExtension) _Eval() (err error) {
 
 // GetDestFuncImpl 获取动态脚本中定义的函数实现，并赋值给dstFn
 func (extension DynamicExtension) GetDestFuncImpl(funcName string, dstFn any) (err error) {
+	if funcName == "" {
+		return nil
+	}
+	if dstFn == nil {
+		err = errors.New("dstFn is nil")
+		return err
+	}
+	if reflect.TypeOf(dstFn).Kind() != reflect.Pointer {
+		err = errors.New("dstFn must be pointer")
+		return err
+	}
 	err = extension._Eval()
 	if err != nil {
 		return err
