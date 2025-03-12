@@ -1,6 +1,8 @@
 module github.com/suifengpiao14/yaegijson
 
-go 1.20
+go 1.21
+
+toolchain go1.22.5
 
 require (
 	github.com/pkg/errors v0.9.1
@@ -8,7 +10,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/traefik/yaegi v0.15.1
+	github.com/traefik/yaegi v0.16.1
 )
 
 require (
