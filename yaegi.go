@@ -42,7 +42,6 @@ func (extension *DynamicExtension) _Eval() (err error) {
 
 	// 解析动态脚本
 	interpreter := interp.New(interp.Options{})
-	interpreter.Use(stdlib.Symbols)
 	interpreter.Use(Symbols) //注册当前包结构体
 
 	if extension.SourceCode != "" {
