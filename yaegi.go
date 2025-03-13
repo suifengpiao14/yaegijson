@@ -5,6 +5,8 @@ import (
 	"reflect"
 
 	"github.com/pkg/errors"
+	_ "github.com/suifengpiao14/gjsonmodifier" // 引入自定义的gjson扩展包后会执行init()方法，注册自定义的gjson扩展函数
+
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
@@ -13,8 +15,7 @@ import (
 //go:generate yaegi extract github.com/tidwall/gjson
 //go:generate yaegi extract github.com/tidwall/sjson
 //go:generate yaegi extract github.com/spf13/cast
-//github.com/suifengpiao14/httpraw
-//github.com/suifengpiao14/gjsonmodifier
+// github.com/suifengpiao14/gjsonmodifier
 
 var Symbols = stdlib.Symbols
 
