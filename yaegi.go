@@ -15,7 +15,8 @@ import (
 //go:generate yaegi extract github.com/tidwall/gjson
 //go:generate yaegi extract github.com/tidwall/sjson
 //go:generate yaegi extract github.com/spf13/cast
-// github.com/suifengpiao14/gjsonmodifier
+//go:generate yaegi extract github.com/pkg/errors
+//github.com/suifengpiao14/gjsonmodifier
 
 var Symbols = stdlib.Symbols
 

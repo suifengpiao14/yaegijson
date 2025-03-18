@@ -10,7 +10,8 @@ func init() {
 	Symbols["github.com/suifengpiao14/yaegijson/yaegijson"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		//"Error_not_found_func": reflect.ValueOf(&yaegijson.Error_not_found_func).Elem(),
-		"GetValueFromJson":     reflect.ValueOf(GetValueFromJson),
+		"GetValuesFromJson":     reflect.ValueOf(GetValuesFromJson),
+		"SetValueToJson":     reflect.ValueOf(SetValueToJson),
 		
 
 		// type definitions
