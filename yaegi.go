@@ -3,6 +3,7 @@ package yaegijson
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/pkg/errors"
 	_ "github.com/suifengpiao14/gjsonmodifier" // 引入自定义的gjson扩展包后会执行init()方法，注册自定义的gjson扩展函数
@@ -20,31 +21,44 @@ import (
 
 var Symbols = stdlib.Symbols
 
-type DynamicExtension struct {
-	ExtensionCode string `json:"extensionCode"`
-	ExtensionPath string `json:"extensionPath"`
-	_interpreter  *interp.Interpreter
-	symbols       map[string]map[string]reflect.Value `json:"-"`
+type Extension struct {
+	SourceCodes  []string `json:"sourceCodes"`
+	SourcePaths  []string `json:"sourcePaths"`
+	_interpreter *interp.Interpreter
+	symbols      map[string]map[string]reflect.Value `json:"-"`
 }
 
-func (extension *DynamicExtension) Withsymbols(symbols map[string]map[string]reflect.Value) *DynamicExtension {
+func (extension *Extension) WithSymbols(symbols map[string]map[string]reflect.Value) *Extension {
 	extension.symbols = symbols
 	return extension
 }
-
-func NewDynamicExtension(sourceCode string, sourcePath string) *DynamicExtension {
-	return &DynamicExtension{
-		ExtensionCode: sourceCode,
-		ExtensionPath: sourcePath,
+func (extension *Extension) WithSouceCode(sourceCodes ...string) *Extension {
+	if extension.SourceCodes == nil {
+		extension.SourceCodes = make([]string, 0)
 	}
+	extension.SourceCodes = append(extension.SourceCodes, sourceCodes...)
+	return extension
+}
+func (extension *Extension) WithSourcePath(sourcePaths ...string) *Extension {
+	if extension.SourcePaths == nil {
+		extension.SourcePaths = make([]string, 0)
+	}
+	extension.SourcePaths = append(extension.SourcePaths, sourcePaths...)
+	return extension
 }
 
-func (extension *DynamicExtension) _Eval() (err error) {
+func NewExtension() *Extension {
+	return &Extension{}
+}
+
+func (extension *Extension) _Eval() (err error) {
 	if extension._interpreter != nil {
 		return nil
 	}
 
-	if extension.ExtensionCode == "" && extension.ExtensionPath == "" {
+	sourceCode := strings.Join(extension.SourceCodes, "\n")
+
+	if sourceCode == "" && len(extension.SourcePaths) == 0 {
 		return errors.New("sourceCode or sourcePath required")
 	}
 
@@ -53,19 +67,21 @@ func (extension *DynamicExtension) _Eval() (err error) {
 	interpreter.Use(Symbols)           //注册当前包结构体
 	interpreter.Use(extension.symbols) //注册外部包结构体
 
-	if extension.ExtensionCode != "" {
-		_, err = interpreter.Eval(extension.ExtensionCode)
+	if sourceCode != "" {
+		_, err = interpreter.Eval(sourceCode)
 		if err != nil {
-			err = errors.WithMessagef(err, "compile dynamic go sourceCode: %s", extension.ExtensionPath)
+			err = errors.WithMessagef(err, "compile dynamic go sourceCode: %s", sourceCode)
 			return err
 		}
 	}
 
-	if extension.ExtensionPath != "" {
-		_, err = interpreter.EvalPath(extension.ExtensionPath)
-		if err != nil {
-			err = errors.WithMessagef(err, "compile dynamic go sourcePath: %s", extension.ExtensionPath)
-			return err
+	if len(extension.SourcePaths) > 0 {
+		for _, sourcePath := range extension.SourcePaths {
+			_, err = interpreter.EvalPath(sourcePath)
+			if err != nil {
+				err = errors.WithMessagef(err, "compile dynamic go sourcePath: %s", sourcePath)
+				return err
+			}
 		}
 	}
 	extension._interpreter = interpreter
@@ -74,7 +90,7 @@ func (extension *DynamicExtension) _Eval() (err error) {
 }
 
 // GetDestFuncImpl 获取动态脚本中定义的函数实现，并赋值给dstFn
-func (extension DynamicExtension) GetDestFuncImpl(funcName string, dstFn any) (err error) {
+func (extension Extension) GetDestFuncImpl(funcName string, dstFn any) (err error) {
 	if funcName == "" {
 		return nil
 	}

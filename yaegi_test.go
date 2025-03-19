@@ -37,7 +37,7 @@ func TestDynamicScript(t *testing.T) {
 	pathFuncName := "curlhook.BeforeFn"
 	sourceFuncName := "curlhook_source.BeforeFn"
 	t.Run("from string", func(t *testing.T) {
-		dynamicExtension := yaegijson.NewDynamicExtension(dynamic, "")
+		dynamicExtension := yaegijson.NewExtension().WithSouceCode(dynamic)
 		err := dynamicExtension.GetDestFuncImpl(sourceFuncName, &dstFn)
 		require.NoError(t, err)
 		output, err := dstFn(input)
@@ -46,7 +46,7 @@ func TestDynamicScript(t *testing.T) {
 		require.JSONEq(t, `{"body":{"_head":{"_timestamps":"1111111111111111"}}}`, output)
 	})
 	t.Run("from path", func(t *testing.T) {
-		dynamicExtension := yaegijson.NewDynamicExtension("", path)
+		dynamicExtension := yaegijson.NewExtension().WithSourcePath(path)
 		err := dynamicExtension.GetDestFuncImpl(pathFuncName, &dstFn)
 		require.NoError(t, err)
 		output, err := dstFn(input)
@@ -55,7 +55,7 @@ func TestDynamicScript(t *testing.T) {
 		require.JSONEq(t, `{"body":{"_head":{"_timestamps":"1111111111111111"}}}`, output)
 	})
 	t.Run("from string and path ,use path", func(t *testing.T) {
-		dynamicExtension := yaegijson.NewDynamicExtension(dynamic, path)
+		dynamicExtension := yaegijson.NewExtension().WithSouceCode(dynamic).WithSourcePath(path)
 		err := dynamicExtension.GetDestFuncImpl(pathFuncName, &dstFn)
 		require.NoError(t, err)
 		output, err := dstFn(input)
@@ -64,7 +64,7 @@ func TestDynamicScript(t *testing.T) {
 		require.JSONEq(t, `{"body":{"_head":{"_timestamps":"1111111111111111"}}}`, output)
 	})
 	t.Run("from string and path,use source code", func(t *testing.T) {
-		dynamicExtension := yaegijson.NewDynamicExtension(dynamic, path)
+		dynamicExtension := yaegijson.NewExtension().WithSouceCode(dynamic).WithSourcePath(path)
 		err := dynamicExtension.GetDestFuncImpl(sourceFuncName, &dstFn)
 		require.NoError(t, err)
 		output, err := dstFn(input)
